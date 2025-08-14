@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-card {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e5e7f0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .result-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .field {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .field:last-child {
+            margin-bottom: 0;
+        }
+
+        .field-label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-value {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .field-value:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .field-text {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .gmail-field .field-text {
+            font-family: 'Courier New', monospace;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .gmail-variants {
+            display: grid;
+            gap: 15px;
+        }
+
+        .gmail-variant {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .gmail-variant:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .variant-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .variant-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .variant-text {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .pinned-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7f0;
+        }
+
+        .pinned-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .pinned-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .clear-pinned-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-pinned-btn:hover {
+            background: #c0392b;
+        }
+
+        .pinned-item {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pinned-info {
+            flex: 1;
+        }
+
+        .pinned-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .pinned-email {
+            font-family: 'Courier New', monospace;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .pinned-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .copy-pinned-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-pinned-btn:hover {
+            background: #5a67d8;
+        }
+
+        .remove-pinned-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .remove-pinned-btn:hover {
+            background: #c0392b;
+        }
+
+        .no-pinned {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .pin-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .pin-btn:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .generate-btn {
+                padding: 12px 30px;
+                font-size: 1.1em;
+            }
+            
+            .field-value {
+                padding: 12px;
+            }
+            
+            .variant-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    
+
+        <button class="generate-btn" onclick="generateGmail()">
+            <i class="fas fa-magic"></i> Generate Random Gmail
+        </button>
+
+        <div id="result-card" class="result-card">
+            <div class="field">
+                <span class="field-label">First Name</span>
+                <div class="field-value">
+                    <span class="field-text" id="first-name"></span>
+                    <button class="copy-btn" onclick="copyToClipboard('first-name')">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="field">
+                <span class="field-label">Last Name</span>
+                <div class="field-value">
+                    <span class="field-text" id="last-name"></span>
+                    <button class="copy-btn" onclick="copyToClipboard('last-name')">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="field">
+                <span class="field-label">Gmail Addresses</span>
+                <div class="gmail-variants">
+                    <div class="gmail-variant">
+                        <div class="variant-label">Full Gmail Address</div>
+                        <div class="variant-content">
+                            <span class="variant-text" id="gmail-full"></span>
+                            <button class="copy-btn" onclick="copyToClipboard('gmail-full')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="gmail-variant">
+                        <div class="variant-label">Username Only</div>
+                        <div class="variant-content">
+                            <span class="variant-text" id="gmail-username"></span>
+                            <button class="copy-btn" onclick="copyToClipboard('gmail-username')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="pin-btn" onclick="pinCurrentIdentity()">
+                <i class="fas fa-star"></i> Pin This Identity
+            </button>
+        </div>
+
+        <div class="pinned-section">
+            <div class="pinned-header">
+                <div class="pinned-title">
+                    <i class="fas fa-star"></i> Pinned Identities
+                </div>
+                <button class="clear-pinned-btn" onclick="clearAllPinned()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+            <div id="pinned-container">
+                <div class="no-pinned">No pinned identities yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Name databases
+        const names = {
+            male: ['James', 'Robert', 'John', 'Michael', 'David', 'William', 'Richard', 'Joseph', 'Thomas', 'Christopher', 'Charles', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth', 'Kevin', 'Brian', 'George', 'Timothy', 'Ronald', 'Jason', 'Edward', 'Jeffrey', 'Ryan', 'Jacob', 'Gary', 'Nicholas', 'Eric', 'Jonathan', 'Stephen', 'Larry', 'Justin', 'Scott', 'Brandon', 'Benjamin', 'Samuel', 'Gregory', 'Alexander', 'Patrick', 'Zachary', 'Frank', 'Raymond', 'Jack', 'Dennis'],
+            female: ['Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Barbara', 'Susan', 'Jessica', 'Sarah', 'Karen', 'Nancy', 'Lisa', 'Betty', 'Helen', 'Sandra', 'Donna', 'Carol', 'Ruth', 'Sharon', 'Michelle', 'Laura', 'Sarah', 'Kimberly', 'Deborah', 'Dorothy', 'Amy', 'Angela', 'Ashley', 'Brenda', 'Emma', 'Olivia', 'Cynthia', 'Marie', 'Janet', 'Catherine', 'Frances', 'Christine', 'Samantha', 'Debra', 'Rachel', 'Carolyn', 'Janet', 'Virginia', 'Maria', 'Heather', 'Diane', 'Julie', 'Joyce', 'Victoria', 'Kelly'],
+            lastNames: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts']
+        };
+
+        let currentIdentity = null;
+
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generateGmail() {
+            // Generate random gender and names
+            const gender = Math.random() < 0.5 ? 'male' : 'female';
+            const firstName = getRandomItem(names[gender]);
+            const lastName = getRandomItem(names.lastNames);
+            
+            // Generate Gmail variants
+            const patterns = [
+                `${firstName.toLowerCase()}.${lastName.toLowerCase()}`,
+                `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
+                `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 99) + 1}`,
+                `${firstName.toLowerCase()}${Math.floor(Math.random() * 99) + 1}.${lastName.toLowerCase()}`
+            ];
+            
+            const gmailUsername = getRandomItem(patterns);
+            const gmailFull = `${gmailUsername}@gmail.com`;
+            
+            // Store current identity
+            currentIdentity = {
+                firstName: firstName,
+                lastName: lastName,
+                gmailFull: gmailFull,
+                gmailUsername: gmailUsername
+            };
+            
+            // Update UI
+            document.getElementById('first-name').textContent = firstName;
+            document.getElementById('last-name').textContent = lastName;
+            document.getElementById('gmail-full').textContent = gmailFull;
+            document.getElementById('gmail-username').textContent = gmailUsername;
+            
+            // Show result card
+            const resultCard = document.getElementById('result-card');
+            resultCard.classList.add('show');
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy', true);
+            });
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.background = isError ? '#e74c3c' : '#4CAF50';
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        function pinCurrentIdentity() {
+            if (!currentIdentity) {
+                showToast('Generate a Gmail first!', true);
+                return;
+            }
+            
+            let pinnedIdentities = JSON.parse(localStorage.getItem('pinnedGmails') || '[]');
+            
+            // Check if already pinned
+            const exists = pinnedIdentities.some(item => item.gmailFull === currentIdentity.gmailFull);
+            if (exists) {
+                showToast('Identity already pinned!', true);
+                return;
+            }
+            
+            // Add to pinned
+            pinnedIdentities.push({
+                first_name: currentIdentity.firstName,
+                last_name: currentIdentity.lastName,
+                gmail: currentIdentity.gmailFull
+            });
+            
+            localStorage.setItem('pinnedGmails', JSON.stringify(pinnedIdentities));
+            loadPinnedIdentities();
+            showToast('Identity pinned successfully!');
+        }
+
+        function loadPinnedIdentities() {
+            const pinnedIdentities = JSON.parse(localStorage.getItem('pinnedGmails') || '[]');
+            const container = document.getElementById('pinned-container');
+            
+            if (pinnedIdentities.length === 0) {
+                container.innerHTML = '<div class="no-pinned">No pinned identities yet</div>';
+                return;
+            }
+            
+            container.innerHTML = pinnedIdentities.map((identity, index) => `
+                <div class="pinned-item">
+                    <div class="pinned-info">
+                        <div class="pinned-name">${identity.first_name} ${identity.last_name}</div>
+                        <div class="pinned-email">${identity.gmail}</div>
+                    </div>
+                    <div class="pinned-actions">
+                        <button class="copy-pinned-btn" onclick="copyPinnedGmail('${identity.gmail}')" title="Copy Gmail">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="remove-pinned-btn" onclick="removePinnedIdentity(${index})" title="Remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function copyPinnedGmail(gmail) {
+            navigator.clipboard.writeText(gmail).then(() => {
+                showToast('Gmail copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy', true);
+            });
+        }
+
+        function removePinnedIdentity(index) {
+            let pinnedIdentities = JSON.parse(localStorage.getItem('pinnedGmails') || '[]');
+            pinnedIdentities.splice(index, 1);
+            localStorage.setItem('pinnedGmails', JSON.stringify(pinnedIdentities));
+            loadPinnedIdentities();
+            showToast('Identity removed from pinned');
+        }
+
+        function clearAllPinned() {
+            const pinnedIdentities = JSON.parse(localStorage.getItem('pinnedGmails') || '[]');
+            if (pinnedIdentities.length === 0) {
+                showToast('No pinned identities to clear!', true);
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear all pinned identities?')) {
+                localStorage.setItem('pinnedGmails', JSON.stringify([]));
+                loadPinnedIdentities();
+                showToast('All pinned identities cleared');
+            }
+        }
+
+        // Load pinned identities on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPinnedIdentities();
+        });
+    </script>
+</body>
+</html>
