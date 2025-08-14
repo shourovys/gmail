@@ -464,13 +464,14 @@
 
             const middleInitial = Math.random() < 0.4 ? firstName[0].toLowerCase() : "";
             const year = Math.random() < 0.5 ? getRandomYear() : "";
-            const hash = Math.random() < 0.6 ? getRandomHash(3) : "";
+            const longHash = Math.random().toString(36).substring(2, 8); // 6-char random string
+            const extraNumber = Math.floor(Math.random() * 9000 + 1000); // 4-digit number
 
             const patterns = [
-                `${firstName.toLowerCase()}${sep}${lastName.toLowerCase()}${year}${hash}`,
-                `${firstName.toLowerCase()}${middleInitial}${sep}${lastName.toLowerCase()}${year}${hash}`,
-                `${lastName.toLowerCase()}${sep}${firstName.toLowerCase()}${year}${hash}`,
-                `${firstName.toLowerCase()}${sep}${lastName.toLowerCase()}${Math.floor(Math.random() * 900 + 100)}${hash}`
+                `${firstName.toLowerCase()}${sep}${middleInitial}${lastName.toLowerCase()}${year}${longHash}${extraNumber}`,
+                `${lastName.toLowerCase()}${sep}${firstName.toLowerCase()}${year}${longHash}${extraNumber}`,
+                `${firstName.toLowerCase()}${sep}${lastName.toLowerCase()}${Math.floor(Math.random() * 9000 + 1000)}${longHash}`,
+                `${firstName.toLowerCase()}${sep}${middleInitial}${lastName.toLowerCase()}${longHash}`
             ];
 
             const gmailUsername = getRandomItem(patterns).replace(/[^a-z0-9._]/g, '');
@@ -490,6 +491,7 @@
 
             document.getElementById('result-card').classList.add('show');
         }
+
 
         function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
