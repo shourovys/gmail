@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -336,20 +337,20 @@
             .container {
                 padding: 30px 20px;
             }
-            
+
             .header h1 {
                 font-size: 2em;
             }
-            
+
             .generate-btn {
                 padding: 12px 30px;
                 font-size: 1.1em;
             }
-            
+
             .field-value {
                 padding: 12px;
             }
-            
+
             .variant-content {
                 flex-direction: column;
                 align-items: stretch;
@@ -358,9 +359,10 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-    
+
 
         <button class="generate-btn" onclick="generateGmail()">
             <i class="fas fa-magic"></i> Generate Random Gmail
@@ -432,7 +434,6 @@
     </div>
 
     <script>
-        // Name databases
         const names = {
             male: ['James', 'Robert', 'John', 'Michael', 'David', 'William', 'Richard', 'Joseph', 'Thomas', 'Christopher', 'Charles', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth', 'Kevin', 'Brian', 'George', 'Timothy', 'Ronald', 'Jason', 'Edward', 'Jeffrey', 'Ryan', 'Jacob', 'Gary', 'Nicholas', 'Eric', 'Jonathan', 'Stephen', 'Larry', 'Justin', 'Scott', 'Brandon', 'Benjamin', 'Samuel', 'Gregory', 'Alexander', 'Patrick', 'Zachary', 'Frank', 'Raymond', 'Jack', 'Dennis'],
             female: ['Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Barbara', 'Susan', 'Jessica', 'Sarah', 'Karen', 'Nancy', 'Lisa', 'Betty', 'Helen', 'Sandra', 'Donna', 'Carol', 'Ruth', 'Sharon', 'Michelle', 'Laura', 'Sarah', 'Kimberly', 'Deborah', 'Dorothy', 'Amy', 'Angela', 'Ashley', 'Brenda', 'Emma', 'Olivia', 'Cynthia', 'Marie', 'Janet', 'Catherine', 'Frances', 'Christine', 'Samantha', 'Debra', 'Rachel', 'Carolyn', 'Janet', 'Virginia', 'Maria', 'Heather', 'Diane', 'Julie', 'Joyce', 'Victoria', 'Kelly'],
@@ -445,47 +446,54 @@
             return array[Math.floor(Math.random() * array.length)];
         }
 
+        function getRandomYear() {
+            return Math.floor(Math.random() * (2003 - 1970 + 1)) + 1970; // 1970-2003
+        }
+
+        function getRandomHash(len = 3) {
+            return Math.random().toString(36).substring(2, 2 + len);
+        }
+
         function generateGmail() {
-            // Generate random gender and names
             const gender = Math.random() < 0.5 ? 'male' : 'female';
             const firstName = getRandomItem(names[gender]);
             const lastName = getRandomItem(names.lastNames);
-            
-            // Generate Gmail variants
+
+            const separators = ["", ".", "_"];
+            const sep = getRandomItem(separators);
+
+            const middleInitial = Math.random() < 0.4 ? firstName[0].toLowerCase() : "";
+            const year = Math.random() < 0.5 ? getRandomYear() : "";
+            const hash = Math.random() < 0.6 ? getRandomHash(3) : "";
+
             const patterns = [
-                `${firstName.toLowerCase()}.${lastName.toLowerCase()}`,
-                `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
-                `${firstName.toLowerCase()}.${lastName.toLowerCase()}${Math.floor(Math.random() * 99) + 1}`,
-                `${firstName.toLowerCase()}${Math.floor(Math.random() * 99) + 1}.${lastName.toLowerCase()}`
+                `${firstName.toLowerCase()}${sep}${lastName.toLowerCase()}${year}${hash}`,
+                `${firstName.toLowerCase()}${middleInitial}${sep}${lastName.toLowerCase()}${year}${hash}`,
+                `${lastName.toLowerCase()}${sep}${firstName.toLowerCase()}${year}${hash}`,
+                `${firstName.toLowerCase()}${sep}${lastName.toLowerCase()}${Math.floor(Math.random() * 900 + 100)}${hash}`
             ];
-            
-            const gmailUsername = getRandomItem(patterns);
+
+            const gmailUsername = getRandomItem(patterns).replace(/[^a-z0-9._]/g, '');
             const gmailFull = `${gmailUsername}@gmail.com`;
-            
-            // Store current identity
+
             currentIdentity = {
-                firstName: firstName,
-                lastName: lastName,
-                gmailFull: gmailFull,
-                gmailUsername: gmailUsername
+                firstName,
+                lastName,
+                gmailFull,
+                gmailUsername
             };
-            
-            // Update UI
+
             document.getElementById('first-name').textContent = firstName;
             document.getElementById('last-name').textContent = lastName;
             document.getElementById('gmail-full').textContent = gmailFull;
             document.getElementById('gmail-username').textContent = gmailUsername;
-            
-            // Show result card
-            const resultCard = document.getElementById('result-card');
-            resultCard.classList.add('show');
+
+            document.getElementById('result-card').classList.add('show');
         }
 
         function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
-            const text = element.textContent;
-            
-            navigator.clipboard.writeText(text).then(() => {
+            navigator.clipboard.writeText(element.textContent).then(() => {
                 showToast('Copied to clipboard!');
             }).catch(() => {
                 showToast('Failed to copy', true);
@@ -497,9 +505,7 @@
             toast.className = 'toast';
             toast.textContent = message;
             toast.style.background = isError ? '#e74c3c' : '#4CAF50';
-            
             document.body.appendChild(toast);
-            
             setTimeout(() => toast.classList.add('show'), 100);
             setTimeout(() => {
                 toast.classList.remove('show');
@@ -512,23 +518,17 @@
                 showToast('Generate a Gmail first!', true);
                 return;
             }
-            
             let pinnedIdentities = JSON.parse(localStorage.getItem('pinnedGmails') || '[]');
-            
-            // Check if already pinned
-            const exists = pinnedIdentities.some(item => item.gmailFull === currentIdentity.gmailFull);
+            const exists = pinnedIdentities.some(item => item.gmail === currentIdentity.gmailFull);
             if (exists) {
                 showToast('Identity already pinned!', true);
                 return;
             }
-            
-            // Add to pinned
             pinnedIdentities.push({
                 first_name: currentIdentity.firstName,
                 last_name: currentIdentity.lastName,
                 gmail: currentIdentity.gmailFull
             });
-            
             localStorage.setItem('pinnedGmails', JSON.stringify(pinnedIdentities));
             loadPinnedIdentities();
             showToast('Identity pinned successfully!');
@@ -537,28 +537,26 @@
         function loadPinnedIdentities() {
             const pinnedIdentities = JSON.parse(localStorage.getItem('pinnedGmails') || '[]');
             const container = document.getElementById('pinned-container');
-            
             if (pinnedIdentities.length === 0) {
                 container.innerHTML = '<div class="no-pinned">No pinned identities yet</div>';
                 return;
             }
-            
             container.innerHTML = pinnedIdentities.map((identity, index) => `
-                <div class="pinned-item">
-                    <div class="pinned-info">
-                        <div class="pinned-name">${identity.first_name} ${identity.last_name}</div>
-                        <div class="pinned-email">${identity.gmail}</div>
-                    </div>
-                    <div class="pinned-actions">
-                        <button class="copy-pinned-btn" onclick="copyPinnedGmail('${identity.gmail}')" title="Copy Gmail">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                        <button class="remove-pinned-btn" onclick="removePinnedIdentity(${index})" title="Remove">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
+            <div class="pinned-item">
+                <div class="pinned-info">
+                    <div class="pinned-name">${identity.first_name} ${identity.last_name}</div>
+                    <div class="pinned-email">${identity.gmail}</div>
                 </div>
-            `).join('');
+                <div class="pinned-actions">
+                    <button class="copy-pinned-btn" onclick="copyPinnedGmail('${identity.gmail}')" title="Copy Gmail">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="remove-pinned-btn" onclick="removePinnedIdentity(${index})" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
         }
 
         function copyPinnedGmail(gmail) {
@@ -583,7 +581,6 @@
                 showToast('No pinned identities to clear!', true);
                 return;
             }
-            
             if (confirm('Are you sure you want to clear all pinned identities?')) {
                 localStorage.setItem('pinnedGmails', JSON.stringify([]));
                 loadPinnedIdentities();
@@ -591,10 +588,9 @@
             }
         }
 
-        // Load pinned identities on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadPinnedIdentities();
-        });
+        document.addEventListener('DOMContentLoaded', loadPinnedIdentities);
     </script>
+
 </body>
+
 </html>
