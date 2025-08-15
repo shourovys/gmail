@@ -459,18 +459,18 @@
             const firstName = getRandomItem(names[gender]);
             const lastName = getRandomItem(names.lastNames);
 
-            const separators = ["", ".", "_"];
+            const separators = ["", ".", ""];
             const sep = getRandomItem(separators);
 
             const middleInitial = Math.random() < 0.4 ? firstName[0].toLowerCase() : "";
             const year = Math.random() < 0.5 ? getRandomYear() : "";
-            const longHash = Math.random().toString(36).substring(2, 8); // 6-char random string
-            const extraNumber = Math.floor(Math.random() * 9000 + 1000); // 4-digit number
+            const longHash = Math.random().toString(36).substring(2, 4); // 2-char random string
+            const extraNumber = Math.floor(Math.random() * 9000 + 10); // 2-digit number
 
             const patterns = [
                 `${firstName.toLowerCase()}${sep}${middleInitial}${lastName.toLowerCase()}${year}${longHash}${extraNumber}`,
                 `${lastName.toLowerCase()}${sep}${firstName.toLowerCase()}${year}${longHash}${extraNumber}`,
-                `${firstName.toLowerCase()}${sep}${lastName.toLowerCase()}${Math.floor(Math.random() * 9000 + 1000)}${longHash}`,
+                `${firstName.toLowerCase()}${sep}${lastName.toLowerCase()}${Math.floor(Math.random() * 9000 + 10)}${longHash}`,
                 `${firstName.toLowerCase()}${sep}${middleInitial}${lastName.toLowerCase()}${longHash}`
             ];
 
